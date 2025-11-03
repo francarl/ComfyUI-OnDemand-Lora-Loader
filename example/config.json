@@ -1,0 +1,12 @@
+{ 
+    "loras": [
+        {
+            "name": "epi_noiseoffset",
+            "url": "https://civitai.com/api/download/models/16576?type=Model&format=SafeTensor&size=full&fp=fp16"
+        },
+        {
+            "name": "Studio Ghibli Style LoRA",
+            "url": "https://civitai.com/api/download/models/7657?type=Model&format=SafeTensor&size=full&fp=fp16"
+        }
+    ]
+}
