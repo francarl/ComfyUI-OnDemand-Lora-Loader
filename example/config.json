@@ -1,0 +1,50 @@
+{ 
+    "loras": [
+        {
+            "name": "epi_noiseoffset",
+            "url": "https://civitai.com/api/download/models/16576?type=Model&format=SafeTensor&size=full&fp=fp16"
+        },
+        {
+            "name": "Studio Ghibli Style LoRA",
+            "url": "https://civitai.com/api/download/models/7657?type=Model&format=SafeTensor&size=full&fp=fp16"
+        }
+    ],
+    "diffusion_models": [
+        {
+            "name": "SDXL 0.9 Base",
+            "url": "https://huggingface.co/stabilityai/sdxl-0.9-base/resolve/main/sdxl_0.9_base_1.0.safetensors"
+        },
+        {
+            "name": "SDXL 0.9 Refiner",
+            "url": "https://huggingface.co/stabilityai/sdxl-0.9-refiner/resolve/main/sdxl_0.9_refiner_1.0.safetensors"
+        }
+    ],
+    "checkpoints": [
+        {
+            "name": "chilloutmix_NiPrunedFp32Fix",
+            "url": "https://civitai.com/api/download/models/15545?type=Model&format=Checkpoint&size=full&fp=fp32"
+        },
+        {
+            "name": "v1-5-pruned-emaonly-fp16",
+            "url": "https://huggingface.co/Comfy-Org/stable-diffusion-v1-5-archive/resolve/main/v1-5-pruned-emaonly-fp16.safetensors"
+        }
+    ],
+    "vae_models": [
+        {
+            "name": "SDXL VAE",
+            "url": "https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors"
+        }
+    ],
+    "clip_models": [
+        {
+            "name": "OpenCLIP ViT-H-14",
+            "url": "https://huggingface.co/openai/clip-vit-large-patch14/resolve/main/pytorch_model.bin"
+        }
+    ],
+    "gguf_models": [
+        {
+            "name": "Wan2.2-T2V-A14B-HighNoise-Q2_K",
+            "url": "https://huggingface.co/QuantStack/Wan2.2-T2V-A14B-GGUF/resolve/main/HighNoise/Wan2.2-T2V-A14B-HighNoise-Q2_K.gguf"
+        }
+    ]
+}
