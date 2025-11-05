@@ -1,0 +1,37 @@
+[project]
+name = "ondemand-loaders"
+description = "This is a custom node for ComfyUI that allows you to download and apply LoRA models directly from Civitai/HuggingFace. It simplifies your workflow by managing LoRA downloads automatically, so you don't have to manually download files and place them in the correct folder."
+version = "1.0.0"
+license = {file = "LICENSE"} 
+# classifiers = [
+#     # For OS-independent nodes (works on all operating systems)
+#     "Operating System :: OS Independent",
+#
+#     # OR for OS-specific nodes, specify the supported systems:
+#     "Operating System :: Microsoft :: Windows",  # Windows specific
+#     "Operating System :: POSIX :: Linux",  # Linux specific
+#     "Operating System :: MacOS",  # macOS specific
+#
+#     # GPU Accelerator support. Pick the ones that are supported by your extension.
+#     "Environment :: GPU :: NVIDIA CUDA",    # NVIDIA CUDA support
+#     "Environment :: GPU :: AMD ROCm",       # AMD ROCm support
+#     "Environment :: GPU :: Intel Arc",      # Intel Arc support
+#     "Environment :: NPU :: Huawei Ascend",  # Huawei Ascend support
+#     "Environment :: GPU :: Apple Metal",    # Apple Metal support
+# ]
+
+dependencies = ["requests"]
+
+[project.urls]
+Repository = "https://github.com/francarl/ComfyUI-OnDemand-Loaders"
+#  Used by Comfy Registry https://registry.comfy.org
+Documentation = "https://github.com/francarl/ComfyUI-OnDemand-Loaders/wiki"
+"Bug Tracker" = "https://github.com/francarl/ComfyUI-OnDemand-Loaders/issues"
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-OnDemand-Loaders"
+Icon = ""
+includes = [] 
+# "requires-comfyui" = ">=1.0.0"  # ComfyUI version compatibility
+
