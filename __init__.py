@@ -159,7 +159,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "OnDemandLoraLoader": "On Demand Lora Loader"
+    "OnDemandLoraLoader": "OnDemand Lora Loader"
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']

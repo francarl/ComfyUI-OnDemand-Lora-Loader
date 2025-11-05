@@ -1,8 +1,8 @@
 {
   "id": "f6f66a45-b5d6-4446-87b9-037380aaf60b",
   "revision": 0,
-  "last_node_id": 15,
-  "last_link_id": 23,
+  "last_node_id": 17,
+  "last_link_id": 29,
   "nodes": [
     {
       "id": 7,
@@ -62,7 +62,7 @@
         {
           "name": "clip",
           "type": "CLIP",
-          "link": 23
+          "link": 28
         }
       ],
       "outputs": [
@@ -211,7 +211,7 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 22
+          "link": 29
         },
         {
           "name": "positive",
@@ -245,7 +245,7 @@
         "Node name for S&R": "KSampler"
       },
       "widgets_values": [
-        171686720687646,
+        1080549289667505,
         "randomize",
         20,
         8,
@@ -275,7 +275,7 @@
           "type": "MODEL",
           "slot_index": 0,
           "links": [
-            16
+            25
           ]
         },
         {
@@ -284,7 +284,7 @@
           "slot_index": 1,
           "links": [
             5,
-            17
+            26
           ]
         },
         {
@@ -306,11 +306,11 @@
       ]
     },
     {
-      "id": 14,
-      "type": "CivitAILoraLoader",
+      "id": 16,
+      "type": "OnDemandLoraLoader",
       "pos": [
-        -276.6407628220838,
-        156.42548419425268
+        -473.6203037648278,
+        -120.31438332949206
       ],
       "size": [
         270,
@@ -323,12 +323,13 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 16
+          "link": 25
         },
         {
           "name": "clip",
+          "shape": 7,
           "type": "CLIP",
-          "link": 17
+          "link": 26
         }
       ],
       "outputs": [
@@ -336,21 +337,21 @@
           "name": "model",
           "type": "MODEL",
           "links": [
-            20
+            27
           ]
         },
         {
           "name": "clip",
           "type": "CLIP",
           "links": [
-            21
+            28
           ]
         }
       ],
       "properties": {
-        "aux_id": "francarl/civitai_comfy_nodes",
-        "ver": "94acea64d96c6d4c9e601d778e0bafb058cee295",
-        "Node name for S&R": "CivitAILoraLoader"
+        "aux_id": "francarl/ComfyUI-OnDemand-Lora-Loader",
+        "ver": "7692e7bb5a528ca5f9d5988d1526a5646b3f9851",
+        "Node name for S&R": "OnDemandLoraLoader"
       },
       "widgets_values": [
         "epi_noiseoffset",
@@ -361,11 +362,11 @@
       ]
     },
     {
-      "id": 15,
-      "type": "CivitAILoraLoader",
+      "id": 17,
+      "type": "OnDemandLoraLoader",
       "pos": [
-        48.864735474289006,
-        151.87839817411643
+        -108.35000981005378,
+        116.6811048152902
       ],
       "size": [
         270,
@@ -378,12 +379,13 @@
         {
           "name": "model",
           "type": "MODEL",
-          "link": 20
+          "link": 27
         },
         {
           "name": "clip",
+          "shape": 7,
           "type": "CLIP",
-          "link": 21
+          "link": null
         }
       ],
       "outputs": [
@@ -391,21 +393,19 @@
           "name": "model",
           "type": "MODEL",
           "links": [
-            22
+            29
           ]
         },
         {
           "name": "clip",
           "type": "CLIP",
-          "links": [
-            23
-          ]
+          "links": null
         }
       ],
       "properties": {
-        "aux_id": "francarl/ComfyUI-CivitAI-Loader",
-        "ver": "2a8a92d481cddc8c156ba530fb0cf0fd5192fda9",
-        "Node name for S&R": "CivitAILoraLoader"
+        "aux_id": "francarl/ComfyUI-OnDemand-Lora-Loader",
+        "ver": "7692e7bb5a528ca5f9d5988d1526a5646b3f9851",
+        "Node name for S&R": "OnDemandLoraLoader"
       },
       "widgets_values": [
         "Studio Ghibli Style LoRA",
@@ -474,52 +474,44 @@
       "IMAGE"
     ],
     [
+      25,
+      4,
+      0,
       16,
-      4,
-      0,
-      14,
       0,
       "MODEL"
     ],
     [
+      26,
+      4,
+      1,
+      16,
+      1,
+      "CLIP"
+    ],
+    [
+      27,
+      16,
+      0,
       17,
-      4,
-      1,
-      14,
-      1,
-      "CLIP"
-    ],
-    [
-      20,
-      14,
-      0,
-      15,
       0,
       "MODEL"
     ],
     [
-      21,
-      14,
-      1,
-      15,
-      1,
-      "CLIP"
-    ],
-    [
-      22,
-      15,
-      0,
-      3,
-      0,
-      "MODEL"
-    ],
-    [
-      23,
-      15,
+      28,
+      16,
       1,
       6,
       0,
       "CLIP"
+    ],
+    [
+      29,
+      17,
+      0,
+      3,
+      0,
+      "MODEL"
     ]
   ],
   "groups": [],
@@ -528,8 +520,8 @@
     "ds": {
       "scale": 0.8523369657374481,
       "offset": [
-        877.2165143137756,
-        -70.14236649200406
+        868.6128138432914,
+        234.9012722729391
       ]
     },
     "frontendVersion": "1.28.8"
