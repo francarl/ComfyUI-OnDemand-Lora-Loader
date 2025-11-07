@@ -6,58 +6,36 @@ import logging
 from tqdm import tqdm
 import re
 import folder_paths
-from nodes import LoraLoader, UNETLoader, CheckpointLoaderSimple, VAELoader, CLIPLoader
-
-# Logger initialization 
-MSG_PREFIX = "[OnDemand Loaders]"
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-if not logger.handlers:
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter(MSG_PREFIX + ' %(levelname)s: %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-
-logger.info("Starting dynamic import of nodes.py from ComfyUI-GGUF...")
-UnetLoaderGGUF = None
-
 from pathlib import Path
 import importlib.util
+from nodes import LoraLoader, UNETLoader, CheckpointLoaderSimple, VAELoader, CLIPLoader
+
+
+logging.info("Starting dynamic import of nodes.py from ComfyUI-GGUF...")
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-nodes_file_path = Path(parent_dir) / 'ComfyUI-GGUF' / 'nodes.py'
-
-if nodes_file_path.exists():
-    module_name = 'nodes'
-    package_path = nodes_file_path.parent
-    spec = importlib.util.spec_from_file_location(
-        module_name, 
-        nodes_file_path, 
-        submodule_search_locations=[str(package_path)], 
-        loader=importlib.machinery.SourceFileLoader(module_name, str(nodes_file_path))
-    )
+module_path = Path(parent_dir) / 'ComfyUI-GGUF' / '__init__.py'
+module_name = "ComfyUI-GGUF"
+module_gguf = None
+if module_path.exists():
     try:
-        if spec is not None:
-            module = importlib.util.module_from_spec(spec)
-            module.__package__ = 'ComfyUI_GGUF'
-            sys.modules[module_name] = module
-            sys.modules['ComfyUI_GGUF'] = module 
-            spec.loader.exec_module(module)            
-            UnetLoaderGGUF = getattr(module, 'UnetLoaderGGUF')
-            
-            logger.info("Successfully found and imported UnetLoaderGGUF dynamically.")
-        
-    except AttributeError:
-        logger.error("'UnetLoaderGGUF' not found in nodes.py. Check the class name.")
+        spec = importlib.util.spec_from_file_location(module_name, str(module_path))
+        module_gguf = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module_gguf 
+        spec.loader.exec_module(module_gguf)
+
+        logging.info("Successfully found and imported UnetLoaderGGUF dynamically.")
+    except AttributeError as ae:
+        logging.error(f"'UnetLoaderGGUF' not found. Check the class name: {ae}")
+        module_gguf = None
     except Exception as e:
-        logger.error(f"Error during module execution (nodes.py content error): {e}")
+        logging.error(f"Error during module execution (nodes.py content error): {e}")
+        module_gguf = None
 
 else:
     # Handle the missing file case gracefully
-    logger.warning(f"Error: ComfyUI-GGUF installation not found! Expected location: {nodes_file_path.parent}")
-    logger.warning("OnDemand GGUF Loaders will not be available")
+    logging.warning(f"ComfyUI-GGUF installation not found! Expected location: {module_path.as_posix().parent}")
+    logging.warning("OnDemand GGUF Loaders will not be available")
 
 
 # Function to load configuration 
@@ -82,16 +60,16 @@ def load_config(config_filename="config.json"):
     try:
         with open(config_path, 'r') as f:
             config = json.load(f)
-        logger.info(f"Successfully loaded configuration from {config_filename}")
+        logging.info(f"Successfully loaded configuration from {config_filename}")
         return config
     except FileNotFoundError:
-        logger.warning(f"Configuration file '{config_path}' not found. Using default fallback configuration.")
+        logging.warning(f"Configuration file '{config_path}' not found. Using default fallback configuration.")
         return default_config
     except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON from '{config_path}'. Using default fallback configuration.")
+        logging.error(f"Error decoding JSON from '{config_path}'. Using default fallback configuration.")
         return default_config
     except Exception as e:
-        logger.error(f"An unexpected error occurred while loading '{config_path}': {e}. Using default fallback.")
+        logging.error(f"An unexpected error occurred while loading '{config_path}': {e}. Using default fallback.")
         return default_config
 
 def _get_api_key_for_url(model_url, api_key_param):
@@ -125,7 +103,7 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
 
     headers = None
     if api_key:
-        logger.info("Using provided API key")
+        logging.info("Using provided API key")
         headers = {
             "Authorization": f"Bearer {api_key}"
         }
@@ -134,7 +112,7 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
         response = requests.get(model_url, stream=True, allow_redirects=True, headers=headers)
         response.raise_for_status()  # Raise an exception for bad status codes
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error making request for '{model_name}' from '{model_url}': {e}")
+        logging.error(f"Error making request for '{model_name}' from '{model_url}': {e}")
         return None
 
     model_filename = None
@@ -151,10 +129,10 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
     model_filepath = os.path.join(destination_dir, model_filename)
 
     if os.path.exists(model_filepath):
-        logger.info(f"File '{model_filename}' already exists at '{model_filepath}'. Skipping download.")
+        logging.info(f"File '{model_filename}' already exists at '{model_filepath}'. Skipping download.")
         return model_filepath
     else:
-        logger.info(f"Downloading '{model_name}' from '{model_url}' to '{model_filepath}'")
+        logging.info(f"Downloading '{model_name}' from '{model_url}' to '{model_filepath}'")
         try:
             total_size = int(response.headers.get('content-length', 0))
             block_size = download_chunks * 1024
@@ -163,10 +141,10 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
                     for data in response.iter_content(block_size):
                         progress_bar.update(len(data))
                         f.write(data)
-            logger.info(f"Successfully downloaded '{model_name}'.")
+            logging.info(f"Successfully downloaded '{model_name}'.")
             return model_filepath
         except Exception as e:
-            logger.error(f"An unexpected error occurred during download of '{model_name}': {e}")
+            logging.error(f"An unexpected error occurred during download of '{model_name}': {e}")
             return None
 
 def _get_model_url_from_config(model_name, model_type_key):
@@ -179,7 +157,7 @@ def _get_model_url_from_config(model_name, model_type_key):
             model_url = model["url"]
             break
     if not model_url:
-        logger.error(f"Model URL not found for name: {model_name} in {model_type_key}")
+        logging.error(f"Model URL not found for name: {model_name} in {model_type_key}")
     return model_url
 
 NODE_CONFIG = load_config()
@@ -430,11 +408,11 @@ class OnDemandGGUFLoader:
     DESCRIPTION = "Load gguf models from CivitAI/HuggingFace, they will be downloaded automatically if not found.\nPut a valid CivitAI/HuggingFace API key in form field 'api_key' or in CIVITAI_TOKEN/HUGGINGFACE_TOKEN environment variable to access private models"
 
     def download_unet(self, unet_name, api_key=None, download_chunks=None):
-        if UnetLoaderGGUF is None:
-            logger.error("UnetLoaderGGUF class not available. Ensure ComfyUI-GGUF is installed correctly.")
+        if module_gguf is None:
+            logging.error("UnetLoaderGGUF class not available. Ensure ComfyUI-GGUF is installed correctly.")
             return None
         
-        self.gguf_loader = UnetLoaderGGUF();
+        self.gguf_loader = module_gguf.nodes.UnetLoaderGGUF()
 
         destination_dir = os.path.join(folder_paths.models_dir, "unet")
 
