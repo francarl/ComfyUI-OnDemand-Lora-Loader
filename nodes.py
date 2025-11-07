@@ -10,8 +10,9 @@ from pathlib import Path
 import importlib.util
 from nodes import LoraLoader, UNETLoader, CheckpointLoaderSimple, VAELoader, CLIPLoader
 
+LOG_PREFIX = "[ComfyUI-OnDemand-Loaders] "
 
-logging.info("Starting dynamic import of nodes.py from ComfyUI-GGUF...")
+logging.info(f"{LOG_PREFIX} Starting dynamic import of nodes.py from ComfyUI-GGUF...")
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 module_path = Path(parent_dir) / 'ComfyUI-GGUF' / '__init__.py'
@@ -24,18 +25,18 @@ if module_path.exists():
         sys.modules[spec.name] = module_gguf 
         spec.loader.exec_module(module_gguf)
 
-        logging.info("Successfully found and imported UnetLoaderGGUF dynamically.")
+        logging.info(f"{LOG_PREFIX} Successfully found and imported UnetLoaderGGUF dynamically.")
     except AttributeError as ae:
-        logging.error(f"'UnetLoaderGGUF' not found. Check the class name: {ae}")
+        logging.error(f"{LOG_PREFIX} 'UnetLoaderGGUF' not found. Check the class name: {ae}")
         module_gguf = None
     except Exception as e:
-        logging.error(f"Error during module execution (nodes.py content error): {e}")
+        logging.error(f"{LOG_PREFIX} Error during module execution (nodes.py content error): {e}")
         module_gguf = None
 
 else:
     # Handle the missing file case gracefully
-    logging.warning(f"ComfyUI-GGUF installation not found! Expected location: {module_path.as_posix().parent}")
-    logging.warning("OnDemand GGUF Loaders will not be available")
+    logging.warning(f"{LOG_PREFIX} ComfyUI-GGUF installation not found! Expected location: {module_path.as_posix().parent}")
+    logging.warning(f"{LOG_PREFIX} OnDemand GGUF Loaders will not be available")
 
 
 # Function to load configuration 
@@ -60,16 +61,16 @@ def load_config(config_filename="config.json"):
     try:
         with open(config_path, 'r') as f:
             config = json.load(f)
-        logging.info(f"Successfully loaded configuration from {config_filename}")
+        logging.info(f"{LOG_PREFIX} Successfully loaded configuration from {config_filename}")
         return config
     except FileNotFoundError:
-        logging.warning(f"Configuration file '{config_path}' not found. Using default fallback configuration.")
+        logging.warning(f"{LOG_PREFIX} Configuration file '{config_path}' not found. Using default fallback configuration.")
         return default_config
     except json.JSONDecodeError:
-        logging.error(f"Error decoding JSON from '{config_path}'. Using default fallback configuration.")
+        logging.error(f"{LOG_PREFIX} Error decoding JSON from '{config_path}'. Using default fallback configuration.")
         return default_config
     except Exception as e:
-        logging.error(f"An unexpected error occurred while loading '{config_path}': {e}. Using default fallback.")
+        logging.error(f"{LOG_PREFIX} An unexpected error occurred while loading '{config_path}': {e}. Using default fallback.")
         return default_config
 
 def _get_api_key_for_url(model_url, api_key_param):
@@ -103,7 +104,7 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
 
     headers = None
     if api_key:
-        logging.info("Using provided API key")
+        logging.info(f"{LOG_PREFIX} Using provided API key")
         headers = {
             "Authorization": f"Bearer {api_key}"
         }
@@ -112,7 +113,7 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
         response = requests.get(model_url, stream=True, allow_redirects=True, headers=headers)
         response.raise_for_status()  # Raise an exception for bad status codes
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error making request for '{model_name}' from '{model_url}': {e}")
+        logging.error(f"{LOG_PREFIX} Error making request for '{model_name}' from '{model_url}': {e}")
         return None
 
     model_filename = None
@@ -129,22 +130,22 @@ def _download_model(model_url, model_name, destination_dir, api_key, download_ch
     model_filepath = os.path.join(destination_dir, model_filename)
 
     if os.path.exists(model_filepath):
-        logging.info(f"File '{model_filename}' already exists at '{model_filepath}'. Skipping download.")
+        logging.info(f"{LOG_PREFIX} File '{model_filename}' already exists at '{model_filepath}'. Skipping download.")
         return model_filepath
     else:
-        logging.info(f"Downloading '{model_name}' from '{model_url}' to '{model_filepath}'")
+        logging.info(f"{LOG_PREFIX} Downloading '{model_name}' from '{model_url}' to '{model_filepath}'")
         try:
             total_size = int(response.headers.get('content-length', 0))
             block_size = download_chunks * 1024
-            with tqdm(total=total_size, unit='iB', unit_scale=True, desc=f"Downloading {model_name}") as progress_bar:
+            with tqdm(total=total_size, unit='iB', unit_scale=True, desc=f"{LOG_PREFIX} Downloading {model_name}") as progress_bar:
                 with open(model_filepath, 'wb') as f:
                     for data in response.iter_content(block_size):
                         progress_bar.update(len(data))
                         f.write(data)
-            logging.info(f"Successfully downloaded '{model_name}'.")
+            logging.info(f"{LOG_PREFIX} Successfully downloaded '{model_name}'.")
             return model_filepath
         except Exception as e:
-            logging.error(f"An unexpected error occurred during download of '{model_name}': {e}")
+            logging.error(f"{LOG_PREFIX} An unexpected error occurred during download of '{model_name}': {e}")
             return None
 
 def _get_model_url_from_config(model_name, model_type_key):
@@ -157,7 +158,7 @@ def _get_model_url_from_config(model_name, model_type_key):
             model_url = model["url"]
             break
     if not model_url:
-        logging.error(f"Model URL not found for name: {model_name} in {model_type_key}")
+        logging.error(f"{LOG_PREFIX} Model URL not found for name: {model_name} in {model_type_key}")
     return model_url
 
 NODE_CONFIG = load_config()
@@ -409,7 +410,7 @@ class OnDemandGGUFLoader:
 
     def download_unet(self, unet_name, api_key=None, download_chunks=None):
         if module_gguf is None:
-            logging.error("UnetLoaderGGUF class not available. Ensure ComfyUI-GGUF is installed correctly.")
+            logging.error(f"{LOG_PREFIX} UnetLoaderGGUF class not available. Ensure ComfyUI-GGUF is installed correctly.")
             return None
         
         self.gguf_loader = module_gguf.nodes.UnetLoaderGGUF()
@@ -429,4 +430,4 @@ class OnDemandGGUFLoader:
         model_filename = os.path.basename(model_filepath)
 
         # Load the gguf using the existing UnetLoaderGGUF
-        return self.gguf_loader.load_unet(model_filename)    
+        return self.gguf_loader.load_unet(model_filename)
