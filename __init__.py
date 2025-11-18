@@ -1,4 +1,6 @@
 from .nodes import OnDemandLoraLoader, OnDemandUNETLoader, OnDemandCheckpointLoader, OnDemandVAELoader, OnDemandCLIPLoader, OnDemandGGUFLoader, OnDemandControlNetLoader
+from .lora_node import OnDemandCivitaiLikedLoraLoader
+
 
 NODE_CLASS_MAPPINGS = {
     "OnDemandLoraLoader": OnDemandLoraLoader,
@@ -7,7 +9,8 @@ NODE_CLASS_MAPPINGS = {
     "OnDemandVAELoader": OnDemandVAELoader,
     "OnDemandCLIPLoader": OnDemandCLIPLoader,
     "OnDemandGGUFLoader": OnDemandGGUFLoader,
-    "OnDemandControlNetLoader": OnDemandControlNetLoader
+    "OnDemandControlNetLoader": OnDemandControlNetLoader,
+    "OnDemandCivitaiLikedLoraLoader": OnDemandCivitaiLikedLoraLoader
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -17,7 +20,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "OnDemandVAELoader": "OnDemand VAE Loader",
     "OnDemandCLIPLoader": "OnDemand CLIP Loader",
     "OnDemandGGUFLoader": "OnDemand GGUF Loader",
-    "OnDemandControlNetLoader": "OnDemand ControlNet Loader"
+    "OnDemandControlNetLoader": "OnDemand ControlNet Loader",
+    "OnDemandCivitaiLikedLoraLoader": "OnDemand Civitai Liked Lora Loader"
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
