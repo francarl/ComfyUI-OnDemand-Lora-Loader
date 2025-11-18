@@ -16,6 +16,7 @@ This is a suite of custom nodes for [ComfyUI](https://github.com/comfyanonymous/
 
 This package includes the following nodes:
 *   `OnDemand Lora Loader`
+*   `OnDemand Civitai Liked Lora Loader`
 *   `OnDemand Checkpoint Loader`
 *   `OnDemand VAE Loader`
 *   `OnDemand UNET Loader`
@@ -108,6 +109,21 @@ You can get the download link from a model's page on Civitai/HuggingFace by righ
 4.  Connect the node in your workflow just as you would with a standard loader. An example workflow can be found in `example/workflow_example.json`.
 
 After modifying `config.json`, press "R" to reload configuration and update workflow without restarting ComfyUI.
+
+### Using the `OnDemand Civitai Liked Lora Loader`
+
+This special node works differently from the others. Instead of using the local `config.json` file, it connects directly to the Civitai API to fetch the list of LoRA models you have marked as "Favorites".
+
+**How it works:**
+
+1.  **Set your API Key**: You must set your Civitai API key as an environment variable named `CIVITAI_TOKEN`. The node uses this key to securely access your private list of liked models.
+2.  **Add the Node**: In ComfyUI, search for and add the `OnDemand Civitai Liked Lora Loader` node.
+3.  **Select a LoRA**: The node's dropdown menu will be automatically populated with all the LoRA models from your Civitai favorites.
+4.  **Download and Load**: When you run a workflow, the selected LoRA will be downloaded to your `ComfyUI/models/loras/` directory (if it doesn't already exist) and applied to the model.
+
+This allows you to manage your LoRA collection directly on the Civitai website without needing to manually update a local configuration file.
+
+> **Note**: This node requires an active internet connection each time you load or refresh ComfyUI to fetch the latest list of your favorite models.
 
 ### 3. Common Node Options
 

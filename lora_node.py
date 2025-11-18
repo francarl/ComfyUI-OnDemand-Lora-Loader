@@ -78,7 +78,7 @@ class OnDemandCivitaiLikedLoraLoader:
         loras = { "loras": [] }
 
         lora_config = _get_lora_config()
-        if not lora_config:
+        if lora_config:
             loras = [lora["name"] for lora in lora_config.get("loras", []) ]
        
         return {
@@ -112,8 +112,8 @@ class OnDemandCivitaiLikedLoraLoader:
 
         lora_url = None
         for lora_model in lora_config.get("loras", []):
-            if model["name"] == lora_name:
-                lora_url = model["url"]
+            if lora_model["name"] == lora_name:
+                lora_url = lora_model["url"]
                 break
 
         if not lora_url:
