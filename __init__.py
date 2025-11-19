@@ -1,5 +1,8 @@
 from .nodes import OnDemandLoraLoader, OnDemandUNETLoader, OnDemandCheckpointLoader, OnDemandVAELoader, OnDemandCLIPLoader, OnDemandGGUFLoader, OnDemandControlNetLoader
 from .lora_node import OnDemandCivitaiLikedLoraLoader
+import server
+from aiohttp import web
+import json
 
 
 NODE_CLASS_MAPPINGS = {
@@ -24,7 +27,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "OnDemandCivitaiLikedLoraLoader": "OnDemand Civitai Liked Lora Loader"
 }
 
-__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
+WEB_DIRECTORY = "./js"
+
+__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', "WEB_DIRECTORY"]
 
 # Module metadata
 __version__ = "1.0.6"
