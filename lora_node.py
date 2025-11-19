@@ -42,6 +42,8 @@ def _transform_data_to_loras_structure(data):
     for item in data.get("items", []):
         main_model_name = item.get("name", "")
         model_versions = item.get("modelVersions", [])
+        model_author = item.get("creator").get("username")
+        model_description = item.get("description", [])
 
         for version in model_versions:
             version_name = version.get("name", "")
@@ -55,12 +57,16 @@ def _transform_data_to_loras_structure(data):
                 if first_file.get("type") == "Model":
                     is_model_type = True
                     download_url = version.get("downloadUrl")
+                    trigger_words = version.get("trainedWords")
 
             if is_model_type and download_url:
                 new_name = f"{main_model_name} - {version_name}"
                 
                 loras_list.append({
                     "name": new_name,
+                    "description": model_description,
+                    "author": model_author,
+                    "trigger_words": trigger_words,
                     "url": download_url
                 })
 
@@ -146,7 +152,7 @@ class OnDemandCivitaiLikedLoraLoader:
         return model_lora, clip_lora
 
 
-@server.PromptServer.instance.routes.post("/francarl/lora_changed")
+@server.PromptServer.instance.routes.post("/on_demand_loader/lora_changed")
 async def lora_changed_handler(request):
     global SELECTED_LORA, LORA_CONFIG
     data = await request.json()
@@ -158,11 +164,19 @@ async def lora_changed_handler(request):
 
             if found_lora:
                 SELECTED_LORA = found_lora
-                print(f"[OnDemandLoader] Found and stored: {SELECTED_LORA}")
             else:
-                print(f"[OnDemandLoader] Lora '{lora_name}' not found in LORA_CONFIG.")
+                logger.error(f"Lora '{lora_name}' not found in LORA_CONFIG.")
         else:
-            print("[OnDemandLoader] LORA_CONFIG is not loaded.")
+            logger.error("LORA_CONFIG is not loaded.")
     else:
         return web.Response(status=400, text=json.dumps({"error": "lora_name not provided"}), content_type='application/json')
     return web.Response(status=200, text=json.dumps({"status": "ok"}), content_type='application/json')
+
+
+@server.PromptServer.instance.routes.get("/on_demand_loader/get_selected_lora_info")
+async def get_selected_lora_info_handler(request):
+    global SELECTED_LORA
+    if SELECTED_LORA:
+        return web.Response(status=200, text=json.dumps(SELECTED_LORA, indent=4), content_type='application/json')
+    else:
+        return web.Response(status=404, text=json.dumps({"error": "No LoRA selected yet."}), content_type='application/json')
