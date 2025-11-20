@@ -28,6 +28,6 @@ WEB_DIRECTORY = "./js"
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS', "WEB_DIRECTORY"]
 
 # Module metadata
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 __author__ = "francarl"
 __description__ = "A suite of nodes for on-demand loading of Diffusion Models, VAE, Clip and Loras in ComfyUI."

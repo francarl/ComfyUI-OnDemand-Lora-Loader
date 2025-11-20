@@ -42,6 +42,7 @@ def _transform_data_to_loras_structure(data):
     for item in data.get("items", []):
         main_model_name = item.get("name", "")
         model_versions = item.get("modelVersions", [])
+        model_id = item.get("id")
         model_author = item.get("creator").get("username")
         model_description = item.get("description", [])
 
@@ -64,10 +65,11 @@ def _transform_data_to_loras_structure(data):
                 
                 loras_list.append({
                     "name": new_name,
-                    "description": model_description,
+                    # "description": model_description,
                     "author": model_author,
                     "trigger_words": trigger_words,
-                    "url": download_url
+                    "url": download_url,
+                    "id": model_id
                 })
 
     return {

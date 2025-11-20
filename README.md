@@ -22,7 +22,7 @@ This package includes the following nodes:
 *   `OnDemand UNET Loader`
 *   `OnDemand CLIP Loader`
 *   `OnDemand ControlNet Loader`
-*   `OnDemand GGUF Loader` (Note: Requires [ComfyUI-GGUF](https://github.com/jquesnelle/ComfyUI-GGUF) to be installed.)
+*   `OnDemand GGUF Loader` (Note: Requires [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) to be installed.)
 
 ## Installation with ComfyUI-Manager
 Search for "OnDemand-Loaders" in custom node list.

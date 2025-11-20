@@ -1,5 +1,6 @@
 import { app } from "/scripts/app.js";
 import { api } from "/scripts/api.js";
+import { ComfyWidgets } from "/scripts/widgets.js";
 
 async function onLoraChanged(node, lora_name) {
     try {
@@ -11,69 +12,71 @@ async function onLoraChanged(node, lora_name) {
             },
         });
         if (response.status !== 200) {
-            console.error(`[OnDemandLoader] Failed to notify backend of lora change: ${response.status}`);
+            console.error(`[ComfyUI-OnDemand-Loaders] Failed to notify backend of lora change: ${response.status}`);
         } else {
 			const loraInfo = await response.json();
 			addOrUpdateLoraInfoWidgets(node, loraInfo);
 		}
     } catch (e) {
-        console.error("[OnDemandLoader] Failed to notify backend of lora change", e);
+        console.error("[ComfyUI-OnDemand-Loaders] Failed to notify backend of lora change", e);
     }
 }
 
 function addOrUpdateLoraInfoWidgets(node, loraInfo) {
-	if (loraInfo.author) {
+	if (loraInfo.name !== "None") {
+
+		if (loraInfo.author) {
+			const authorWidget = node.widgets.find((w) => w.name === "author");
+			if (!authorWidget) {
+				const w = ComfyWidgets["STRING"](node, "author", ["STRING", { multiline: false }], app).widget;
+				w.inputEl.readOnly = true;
+				w.inputEl.style.opacity = 0.8;
+				w.value = loraInfo.author;
+			} else {
+				authorWidget.value = loraInfo.author;
+				authorWidget.hidden = false;
+			}
+		}
+
+		if (loraInfo.trigger_words) {
+			const triggerWordsWidget = node.widgets.find((w) => w.name === "trigger_words");
+			if (!triggerWordsWidget) {
+				const w = ComfyWidgets["STRING"](node, "trigger_words", ["STRING", { multiline: true }], app).widget;
+				w.inputEl.readOnly = true;
+				w.inputEl.style.opacity = 0.8;
+				w.value = loraInfo.trigger_words.join(', ');
+			} else {
+				triggerWordsWidget.value = loraInfo.trigger_words.join(', ');
+				triggerWordsWidget.hidden = false;
+			}
+		}
+		if (loraInfo.id) {
+			const urlWidget = node.widgets.find((w) => w.name === "url");
+			if (!urlWidget) {
+				const w = ComfyWidgets["MARKDOWN"](node, "url", ["STRING", { multiline: false }], app).widget;
+				w.inputEl.readOnly = true;
+				w.inputEl.style.opacity = 0.8;
+				w.value = `[Civitai Model URL](https://civitai.com/models/${loraInfo.id})`;
+			} else {
+				urlWidget.value = `[Civitai Model URL](https://civitai.com/models/${loraInfo.id})`;
+				urlWidget.hidden = false;
+			}
+		}
+	} else {
 		const authorWidget = node.widgets.find((w) => w.name === "author");
-		if (!authorWidget) {
-			node.addWidget("text",
-				"author",
-				loraInfo.author,
-				null,
-				{ serialize: false,
-					read_only: true
-				 }
-			);
-		} else {
-			authorWidget.value = loraInfo.author;
+		if (authorWidget) {
+			authorWidget.hidden = true;
 		}
-	}
-
-	if (loraInfo.trigger_words) {
 		const triggerWordsWidget = node.widgets.find((w) => w.name === "trigger_words");
-		if (!triggerWordsWidget) {
-			node.addWidget("text",
-				"trigger_words",
-				loraInfo.trigger_words.join(', '),
-				null,
-				{ serialize: false,
-					read_only: true,
-					multiline: true
-				 }
-			);
-		} else {
-			triggerWordsWidget.value = loraInfo.trigger_words.join(', ');
+		if (triggerWordsWidget) {
+			triggerWordsWidget.hidden = true;
+		}
+		const urlWidget = node.widgets.find((w) => w.name === "url");
+		if (urlWidget) {
+			urlWidget.hidden = true;
 		}
 	}
-	/*                    					
-	if (loraInfo.description) {
-		const template = document.createElement('div');
-		template.innerHTML = loraInfo.description;
-		
-		const descriptionWidget = node.widgets.find((w) => w.name === "lora_description_html");
-		if (!descriptionWidget) {
-			node.addDOMWidget("lora_description_html", 
-				// loraInfo.description, 
-				'customtext',
-				template.firstElementChild, {
-					hideOnZoom: false
-				}
-			);
-		} else {
-			descriptionWidget.inputEl = template.firstElementChild;
-		}
-	}
-	*/
-
+	node.computeSize();
 }
 
 
@@ -101,11 +104,9 @@ app.registerExtension({
 		}
 	},
 	async setup() {
-        // This function will be called when the extension is loaded.
-        // We define a global function that ComfyUI's _WEB_CONTROL_TYPES can call.
         window.showSelectedLoraInfo = async (node, widget) => {
-            console.log("[OnDemandLoader] Show Selected LoRA Info button clicked!");
-
+            onLoraChanged(node, widget.value);
+			/*
             try {
                 const response = await fetch("/on_demand_loader/get_selected_lora_info");
                 if (response.ok) {
@@ -116,9 +117,10 @@ app.registerExtension({
                     alert(`Error fetching LoRA info: ${errorData.error || response.statusText}`);
                 }
             } catch (error) {
-                console.error("[OnDemandLoader] Failed to fetch selected LoRA info:", error);
+                console.error("[ComfyUI-OnDemand-Loaders] Failed to fetch selected LoRA info:", error);
                 alert("Failed to fetch selected LoRA info. Check console for details.");
             }
+				*/
         };
     }
 });
