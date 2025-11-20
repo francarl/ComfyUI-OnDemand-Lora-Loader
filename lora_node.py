@@ -9,9 +9,16 @@ from tqdm import tqdm
 import folder_paths
 from pathlib import Path
 from nodes import LoraLoader
+import server
+from aiohttp import web
+import json
+
 from .nodes import _get_api_key_for_url, _download_model, logger
 
 API_URL = "https://civitai.com/api/v1/models?types=LORA&favorites=true&nsfw=true"
+LORA_CONFIG = None
+SELECTED_LORA = None
+
 
 def _fetch_data_from_api(url):
     try:
@@ -35,6 +42,9 @@ def _transform_data_to_loras_structure(data):
     for item in data.get("items", []):
         main_model_name = item.get("name", "")
         model_versions = item.get("modelVersions", [])
+        model_id = item.get("id")
+        model_author = item.get("creator").get("username")
+        model_description = item.get("description", [])
 
         for version in model_versions:
             version_name = version.get("name", "")
@@ -48,13 +58,18 @@ def _transform_data_to_loras_structure(data):
                 if first_file.get("type") == "Model":
                     is_model_type = True
                     download_url = version.get("downloadUrl")
+                    trigger_words = version.get("trainedWords")
 
             if is_model_type and download_url:
                 new_name = f"{main_model_name} - {version_name}"
                 
                 loras_list.append({
                     "name": new_name,
-                    "url": download_url
+                    # "description": model_description,
+                    "author": model_author,
+                    "trigger_words": trigger_words,
+                    "url": download_url,
+                    "id": model_id
                 })
 
     return {
@@ -62,24 +77,29 @@ def _transform_data_to_loras_structure(data):
     }
 
 def _get_lora_config():
-    raw_data = _fetch_data_from_api(API_URL)
-    if not raw_data:
-        return None
+    global LORA_CONFIG
+    if LORA_CONFIG is not None:
+        return LORA_CONFIG
 
-    lora_config = _transform_data_to_loras_structure(raw_data)
-    none_entry = {"name": "None", "url": None}
-    lora_config['loras'].insert(0, none_entry)
-    return lora_config
+    raw_data = _fetch_data_from_api(API_URL)
+    if raw_data:
+        lora_config = _transform_data_to_loras_structure(raw_data)
+        none_entry = {"name": "None", "url": None}
+        lora_config['loras'].insert(0, none_entry)
+        LORA_CONFIG = lora_config
+        return LORA_CONFIG
+    
+    return None
 
 class OnDemandCivitaiLikedLoraLoader:
 
     @classmethod
     def INPUT_TYPES(cls):
         loras = { "loras": [] }
-
-        lora_config = _get_lora_config()
-        if lora_config:
-            loras = [lora["name"] for lora in lora_config.get("loras", []) ]
+        global LORA_CONFIG
+        LORA_CONFIG = _get_lora_config()
+        if LORA_CONFIG:
+            loras = [lora["name"] for lora in LORA_CONFIG.get("loras", []) ]
        
         return {
             "required": {
@@ -104,14 +124,15 @@ class OnDemandCivitaiLikedLoraLoader:
     def download_lora(self, model, lora_name, strength_model, strength_clip, clip=None, api_key=None, download_chunks=None):
         self.lora_loader = LoraLoader()
 
-        lora_config = _get_lora_config()
-        if not lora_config:
+        global LORA_CONFIG
+        LORA_CONFIG = _get_lora_config()
+        if not LORA_CONFIG:
             return model, clip # Return original model/clip if civitai api call fails
 
         destination_dir = os.path.join(folder_paths.models_dir, "loras")
 
         lora_url = None
-        for lora_model in lora_config.get("loras", []):
+        for lora_model in LORA_CONFIG.get("loras", []):
             if lora_model["name"] == lora_name:
                 lora_url = lora_model["url"]
                 break
@@ -131,3 +152,33 @@ class OnDemandCivitaiLikedLoraLoader:
         # Load the LORA using the existing LoraLoader
         model_lora, clip_lora = self.lora_loader.load_lora(model, clip, lora_filename, strength_model, strength_clip)
         return model_lora, clip_lora
+
+
+@server.PromptServer.instance.routes.post("/on_demand_loader/lora_changed")
+async def lora_changed_handler(request):
+    global SELECTED_LORA, LORA_CONFIG
+    data = await request.json()
+    lora_name = data.get("lora_name")
+    if lora_name:
+        print(f"[OnDemandLoader] The user selected '{lora_name}'")
+        if LORA_CONFIG:
+            found_lora = next((lora for lora in LORA_CONFIG.get("loras", []) if lora["name"] == lora_name), None)
+
+            if found_lora:
+                SELECTED_LORA = found_lora
+            else:
+                logger.error(f"Lora '{lora_name}' not found in LORA_CONFIG.")
+        else:
+            logger.error("LORA_CONFIG is not loaded.")
+    if SELECTED_LORA:
+        return web.Response(status=200, text=json.dumps(SELECTED_LORA, indent=4), content_type='application/json')
+    else:
+        return web.Response(status=404, text=json.dumps({"error": "No LoRA selected yet."}), content_type='application/json')
+
+@server.PromptServer.instance.routes.get("/on_demand_loader/get_selected_lora_info")
+async def get_selected_lora_info_handler(request):
+    global SELECTED_LORA
+    if SELECTED_LORA:
+        return web.Response(status=200, text=json.dumps(SELECTED_LORA, indent=4), content_type='application/json')
+    else:
+        return web.Response(status=404, text=json.dumps({"error": "No LoRA selected yet."}), content_type='application/json')
