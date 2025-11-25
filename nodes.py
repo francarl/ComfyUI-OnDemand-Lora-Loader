@@ -488,7 +488,7 @@ class OnDemandCLIPVisionLoader:
                                 "api_key": ("STRING", {"default": None, "multiline": False}),
                                 "download_chunks": ("INT", {"default": 4, "min": 1, "max": 12, "step": 1})
                              }}
-    RETURN_TYPES = ("CLIP",)
+    RETURN_TYPES = ("CLIP_VISION",)
     FUNCTION = "download_clip"
     CATEGORY = "loaders"
     DESCRIPTION = "Load clip vision models from CivitAI/HuggingFace, they will be downloaded automatically if not found.\nPut a valid CivitAI/HuggingFace API key in form field 'api_key' or in CIVITAI_TOKEN/HUGGINGFACE_TOKEN environment variable to access private models"
